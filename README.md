@@ -1,2 +1,0 @@
-# mvvmfootball
-mvvm application

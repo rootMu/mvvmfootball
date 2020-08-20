@@ -1,5 +1,7 @@
-package com.matthew.mvvmfootball.di
+package com.matthew.mvvmfootball.dagger.modules
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.matthew.mvvmfootball.BuildConfig.BASE_URL
 import com.matthew.mvvmfootball.network.FootballApi
@@ -10,8 +12,11 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
-import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.converter.gson.GsonConverterFactory
 
+/**
+ * Network Specific Dependencies
+ */
 @Module
 object NetworkModule {
 
@@ -27,6 +32,11 @@ object NetworkModule {
         return retrofit.create(FootballApi::class.java)
     }
 
+    @Provides
+    fun provideGson(): Gson {
+        return GsonBuilder().create()
+    }
+
     /**
      * Provides the Retrofit object.
      * @param okHttpClient the OkHttpClient object
@@ -35,12 +45,16 @@ object NetworkModule {
     @Provides
     @Reusable
     @JvmStatic
-    internal fun provideRetrofitInterface(okHttpClient: OkHttpClient): Retrofit {
+    internal fun provideRetrofitInterface(okHttpClient: OkHttpClient, gson: Gson): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .client(provideOkHttpClient(provideLoggingInterceptor()))
+            .client(
+                provideOkHttpClient(
+                    provideLoggingInterceptor()
+                )
+            )
             .addCallAdapterFactory(CoroutineCallAdapterFactory())
-            .addConverterFactory(MoshiConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .client(okHttpClient)
             .build()

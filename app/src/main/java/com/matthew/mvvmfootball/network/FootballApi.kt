@@ -14,5 +14,5 @@ interface FootballApi {
      * Get a list of football players and teams
      */
     @POST("/api/football/1.0/search")
-    fun getListAsync(@Query("searchString") searchString: String): Deferred<Response<ApiResponse>>
+    fun getListAsync(@Query("searchString") searchString: String): ApiRequestInterface<ApiResponse>
 }

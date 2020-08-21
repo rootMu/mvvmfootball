@@ -1,11 +1,13 @@
-package com.matthew.mvvmfootball
+package com.matthew.mvvmfootball.modules.splash
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import com.matthew.mvvmfootball.R
 import com.matthew.mvvmfootball.databinding.ActivitySplashBinding
+import com.matthew.mvvmfootball.modules.list.ui.ListActivity
 import com.matthew.mvvmfootball.utils.NetworkUtil
 
 class SplashActivity : AppCompatActivity() {
@@ -15,7 +17,9 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_splash)
+        binding = DataBindingUtil.setContentView(this,
+            R.layout.activity_splash
+        )
 
         NetworkUtil.isInternetAvailable(this@SplashActivity).observe(this@SplashActivity, Observer { available ->
             if(available)

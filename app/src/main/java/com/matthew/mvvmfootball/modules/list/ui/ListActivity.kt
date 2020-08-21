@@ -1,11 +1,12 @@
-package com.matthew.mvvmfootball
+package com.matthew.mvvmfootball.modules.list.ui
 
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import com.matthew.mvvmfootball.R
 import com.matthew.mvvmfootball.databinding.ActivityListBinding
-import com.matthew.mvvmfootball.modules.ListViewModel
+import com.matthew.mvvmfootball.modules.list.viewmodel.ListViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -18,7 +19,9 @@ class ListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_list)
+        binding = DataBindingUtil.setContentView(this,
+            R.layout.activity_list
+        )
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
     }

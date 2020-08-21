@@ -1,6 +1,7 @@
 package com.matthew.mvvmfootball.utils
 
 import android.view.View
+import androidx.appcompat.widget.SearchView
 import androidx.databinding.BindingAdapter
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -29,3 +30,8 @@ fun setAdapterItems(view: RecyclerView, items: LiveData<List<ListUiModel>>){
         }
     }
 }
+
+//@BindingAdapter("onQueryTextListener")
+//fun setOnQueryTextListener(view: SearchView, listener: SearchView.OnQueryTextListener){
+//    view.setOnQueryTextListener(listener)
+//}

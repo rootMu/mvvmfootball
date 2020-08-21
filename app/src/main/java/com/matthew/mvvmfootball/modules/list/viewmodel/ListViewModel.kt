@@ -1,6 +1,7 @@
 package com.matthew.mvvmfootball.modules.list.viewmodel
 
 import android.view.View
+import androidx.appcompat.widget.SearchView
 import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
@@ -13,7 +14,8 @@ import kotlinx.coroutines.Dispatchers
 class ListViewModel @ViewModelInject constructor(
     private var repository: ListRepository,
     @Assisted private val savedStateHandle: SavedStateHandle
-) : ViewModel(), SwipeRefreshLayout.OnRefreshListener, LifecycleObserver {
+) : ViewModel(), SwipeRefreshLayout.OnRefreshListener, LifecycleObserver,
+    SearchView.OnQueryTextListener {
 
     companion object {
         const val TAG = "LIST_VIEW_MODEL"
@@ -28,19 +30,17 @@ class ListViewModel @ViewModelInject constructor(
         loadData()
     }
 
-    val playerData = Transformations.map(footballLiveData, ::mapDataToPlayers)
-    val teamData = Transformations.map(footballLiveData, ::mapDataToTeams)
     val uiData = Transformations.map(footballLiveData, ::mapDataToUi)
 
-    private fun mapDataToPlayers(data: ApiResponse) = data.result.players
-    private fun mapDataToTeams(data: ApiResponse) = data.result.teams
-    private fun mapDataToUi(data: ApiResponse): List<ListUiModel> {
+    private var searchString = ""
+
+    private fun mapDataToUi(data: ApiResponse?): List<ListUiModel> {
 
         val list = mutableListOf<ListUiModel>()
 
-        data.result.apply {
+        data?.result?.apply {
 
-            players.map {
+            players?.map {
                 list.add(
                     UiPlayer(
                         name = "${it.playerFirstName} ${it.playerSecondName}",
@@ -50,7 +50,7 @@ class ListViewModel @ViewModelInject constructor(
                 )
             }
 
-            teams.map {
+            teams?.map {
                 list.add(
                     UiClub(
                         name = it.teamName,
@@ -62,22 +62,24 @@ class ListViewModel @ViewModelInject constructor(
             }
 
             //if there were clubs add a club title to the beginning
-            if (players.isNotEmpty()) {
+            if (!players.isNullOrEmpty()) {
                 list.add(players.size, UiTitle("Clubs"))
             }
 
             //If there were players add a player title to the beginning
-            if (players.isNotEmpty()) {
+            if (!players.isNullOrEmpty()) {
                 list.add(0, UiTitle("Players"))
             }
 
+            //Add Error State here for both player and teams being empty
         }
+
         return list
     }
 
     private fun loadData() =
         liveData(Dispatchers.IO) {
-            val retrievedData = repository.getData("barc")
+            val retrievedData = repository.getData(searchString)
             loadingVisibility.postValue(View.GONE)
             emit(retrievedData)
         }
@@ -87,16 +89,26 @@ class ListViewModel @ViewModelInject constructor(
 
     fun getFootballAdapter() = adapter
 
-    init {
-        onRefresh()
-    }
-
     override fun onRefresh() {
-        loadTrigger.value = Unit
+        setSearchString(searchString)
     }
 
     sealed class UiModel {
         data class Error(val exception: Exception) : UiModel()
     }
 
+    override fun onQueryTextSubmit(query: String?): Boolean {
+        return setSearchString(query)
+    }
+
+    private fun setSearchString(search: String? = null): Boolean {
+        val newSearch = search ?: ""
+        searchString = newSearch
+        loadTrigger.value = Unit
+        return searchString.isNotEmpty()
+    }
+
+    override fun onQueryTextChange(newText: String?): Boolean {
+        return false
+    }
 }

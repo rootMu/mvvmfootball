@@ -23,6 +23,6 @@ interface FootballDao {
     @Delete
     fun deletePlayers(vararg players: PlayerData)
 
-    @Query("DELETE from PlayerData")
+    @Query("DELETE from playerData")
     fun deleteAll()
 }

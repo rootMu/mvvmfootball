@@ -10,6 +10,9 @@ import com.matthew.mvvmfootball.room.FootballDataHandler
 import com.matthew.mvvmfootball.room.FootballDatabase
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ApplicationComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import javax.inject.Singleton
@@ -17,12 +20,13 @@ import javax.inject.Singleton
 /**
  * Room Specific Dependencies
  */
-@Module
+@InstallIn(ApplicationComponent::class)
+@Module(includes = [NetworkModule::class])
 class DatabaseModule {
 
     @Singleton
     @Provides
-    fun provideFootballDatabase(context: Context) = Room.databaseBuilder(context.applicationContext,
+    fun provideFootballDatabase(@ApplicationContext context: Context) = Room.databaseBuilder(context.applicationContext,
         FootballDatabase::class.java, "football.db")
         .build()
 

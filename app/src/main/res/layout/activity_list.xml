@@ -14,6 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".modules.ui.AlbumListActivity"
+        android:background="@color/colorAccent"
         app:onRefreshListener="@{viewModel}"
         app:isRefreshing="@{viewModel.getLoadingVisibility()}">
 
@@ -25,7 +26,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Hello World!"
+                android:text="@{String.format(@string/player_data_size, viewModel.playerData.size())}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"

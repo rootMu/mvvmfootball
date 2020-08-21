@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MVVM Football</string>
+
+    <string name="player_data_size">There are %1$d players</string>
 </resources>

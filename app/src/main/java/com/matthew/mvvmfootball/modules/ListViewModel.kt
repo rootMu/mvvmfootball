@@ -1,89 +1,63 @@
 package com.matthew.mvvmfootball.modules
 
-import android.util.Log
 import android.view.View
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.hilt.Assisted
+import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.*
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.matthew.mvvmfootball.di.DaggerViewModelInjector
-import com.matthew.mvvmfootball.di.NetworkModule
-import com.matthew.mvvmfootball.di.ViewModelInjector
-import com.matthew.mvvmfootball.network.FootballApi
-import com.matthew.mvvmfootball.utils.SingleLiveEvent
+import com.matthew.mvvmfootball.network.model.ApiResponse
+import com.matthew.mvvmfootball.room.PlayerData
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
-import java.lang.Exception
-import javax.inject.Inject
 
-class ListViewModel : ViewModel(), SwipeRefreshLayout.OnRefreshListener {
+class ListViewModel @ViewModelInject constructor(
+    private var repository: ListRepository,
+    @Assisted private val savedStateHandle: SavedStateHandle
+) : ViewModel(), SwipeRefreshLayout.OnRefreshListener, LifecycleObserver {
 
     companion object {
         const val TAG = "LIST_VIEW_MODEL"
     }
 
-    private val injector: ViewModelInjector = DaggerViewModelInjector
-        .builder()
-        .networkModule(NetworkModule)
-        .build()
-
-    @Inject
-    lateinit var mApi: FootballApi
-
     val viewState: MutableLiveData<UiModel> = MutableLiveData()
     val loadingVisibility: MutableLiveData<Int> = MutableLiveData()
-    val launchList = SingleLiveEvent<Void>()
+
+    private val loadTrigger = MutableLiveData(Unit)
+
+    val footballLiveData: LiveData<ApiResponse> = loadTrigger.switchMap {
+        loadData()
+    }
+
+    val playerData = Transformations.map(footballLiveData, ::mapDataToPlayers)
+    val teamData = Transformations.map(footballLiveData, ::mapDataToTeams)
+
+    private fun mapDataToPlayers(data: ApiResponse) = data.result.players.map {
+        PlayerData(
+            0,
+            it.playerAge,
+            it.playerClub,
+            it.playerFirstName,
+            it.playerSecondName,
+            it.playerID,
+            it.playerNationality
+        )
+    }
+
+    private fun mapDataToTeams(data: ApiResponse) = data.result.teams
+
+    private fun loadData() =
+        liveData(Dispatchers.IO) {
+            val retrievedData = repository.getData("barc")
+            loadingVisibility.postValue(View.GONE)
+            emit(retrievedData)
+        }
 
     init {
-        injector.inject(this)
-
-        fetchDataFromServer(true)
-
-        android.os.Handler().postDelayed({
-            //launchList.call()
-        }, 3000L)
+        onRefresh()
     }
 
     override fun onRefresh() {
-        fetchDataFromServer()
+        loadTrigger.value = Unit
     }
-
-    private fun fetchDataFromServer(firstCall: Boolean = false) {
-        viewModelScope.launch(Dispatchers.Main) {
-            try {
-                loadingVisibility.postValue(View.VISIBLE)
-                withTimeout(10000L) {
-                    mApi.getListAsync("barc").await().body()?.let {
-
-
-
-                        loadingVisibility.postValue(View.GONE)
-                        if(firstCall)
-                            launchList.call()
-                    }
-                }
-            } catch (error: Exception) {
-                loadingVisibility.postValue(View.GONE)
-                error.handle()
-            }
-        }
-    }
-
-    private fun Exception.handle() {
-        when (this) {
-            is TimeoutCancellationException -> {
-                Log.e(TAG, "Search Timed out", this)
-            }
-            else -> {
-                Log.e(TAG, "API Call failed", this)
-            }
-        }
-
-        viewState.postValue(UiModel.Error(this))
-    }
-
 
     sealed class UiModel {
         data class Error(val exception: Exception) : UiModel()

@@ -1,25 +1,26 @@
 package com.matthew.mvvmfootball
 
 import android.os.Bundle
-import android.os.PersistableBundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModelProvider
 import com.matthew.mvvmfootball.databinding.ActivityListBinding
 import com.matthew.mvvmfootball.modules.ListViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class ListActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityListBinding
-    private lateinit var viewModel: ListViewModel
+    private val viewModel: ListViewModel by viewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
+    private lateinit var binding: ActivityListBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_list)
-        viewModel = ViewModelProvider(this).get(ListViewModel::class.java)
-
-        setContentView(R.layout.activity_list)
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = this
     }
 
 

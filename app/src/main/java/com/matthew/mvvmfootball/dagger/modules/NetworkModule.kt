@@ -1,17 +1,26 @@
-package com.matthew.mvvmfootball.di
+package com.matthew.mvvmfootball.dagger.modules
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.matthew.mvvmfootball.BuildConfig.BASE_URL
 import com.matthew.mvvmfootball.network.FootballApi
 import dagger.Module
 import dagger.Provides
 import dagger.Reusable
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ApplicationComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 
+/**
+ * Network Specific Dependencies
+ */
+@InstallIn(ApplicationComponent::class)
 @Module
 object NetworkModule {
 
@@ -27,6 +36,11 @@ object NetworkModule {
         return retrofit.create(FootballApi::class.java)
     }
 
+    @Provides
+    fun provideGson(): Gson {
+        return GsonBuilder().create()
+    }
+
     /**
      * Provides the Retrofit object.
      * @param okHttpClient the OkHttpClient object
@@ -35,16 +49,15 @@ object NetworkModule {
     @Provides
     @Reusable
     @JvmStatic
-    internal fun provideRetrofitInterface(okHttpClient: OkHttpClient): Retrofit {
-        return Retrofit.Builder()
+    internal fun provideRetrofitInterface(okHttpClient: OkHttpClient, gson: Gson) =
+        Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .client(provideOkHttpClient(provideLoggingInterceptor()))
+            .client(okHttpClient)
             .addCallAdapterFactory(CoroutineCallAdapterFactory())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .addConverterFactory(MoshiConverterFactory.create())
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .client(okHttpClient)
             .build()
-    }
 
     /**
      * Provides the OkHttpClient object.

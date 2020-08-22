@@ -7,13 +7,13 @@ data class ApiResponse(
 data class Result(
     val message: String,
     val minVer: String,
-    val players: List<Player>,
+    val players: List<Player>?,
     val request_order: Int,
     val searchString: String,
     val searchType: String,
     val serverAlert: String,
     val status: Boolean,
-    val teams: List<Team>
+    val teams: List<Team>?
 )
 
 data class Player(

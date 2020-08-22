@@ -9,9 +9,6 @@ import com.matthew.mvvmfootball.R
 import com.matthew.mvvmfootball.databinding.ItemPlayerBinding
 import com.matthew.mvvmfootball.databinding.ItemTeamBinding
 import com.matthew.mvvmfootball.databinding.ItemTitleBinding
-import com.matthew.mvvmfootball.network.model.Player
-import com.matthew.mvvmfootball.network.model.Team
-
 
 class FootballAdapter :
     ListAdapter<ListUiModel, BaseViewHolder<*>>(DiffCallback()) {

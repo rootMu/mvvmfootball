@@ -5,4 +5,5 @@
     <string name="plays_for">Plays for %1$s</string>
     <string name="home_ground">Homeground %1$s in %2$s</string>
     <string name="search">search…</string>
+    <string name="age">Age: %1$s</string>
 </resources>

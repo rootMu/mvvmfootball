@@ -26,7 +26,7 @@ class ListViewModel @ViewModelInject constructor(
 
     private val loadTrigger = MutableLiveData(Unit)
 
-    val footballLiveData: LiveData<ApiResponse> = loadTrigger.switchMap {
+    val footballLiveData: LiveData<ApiResponse?> = loadTrigger.switchMap {
         loadData()
     }
 
@@ -44,7 +44,7 @@ class ListViewModel @ViewModelInject constructor(
                 list.add(
                     UiPlayer(
                         name = "${it.playerFirstName} ${it.playerSecondName}",
-                        nationality = it.playerNationality,
+                        age = it.playerAge,
                         club = it.playerClub
                     )
                 )
@@ -62,13 +62,17 @@ class ListViewModel @ViewModelInject constructor(
             }
 
             //if there were clubs add a club title to the beginning
-            if (!players.isNullOrEmpty()) {
-                list.add(players.size, UiTitle("Clubs"))
+            if (!teams.isNullOrEmpty()) {
+                list.add(players?.size?:0, UiTitle("Clubs"))
             }
 
             //If there were players add a player title to the beginning
             if (!players.isNullOrEmpty()) {
                 list.add(0, UiTitle("Players"))
+            }
+
+            if(players.isNullOrEmpty() && teams.isNullOrEmpty()){
+                list.add(UiTitle())
             }
 
             //Add Error State here for both player and teams being empty
@@ -79,9 +83,14 @@ class ListViewModel @ViewModelInject constructor(
 
     private fun loadData() =
         liveData(Dispatchers.IO) {
-            val retrievedData = repository.getData(searchString)
-            loadingVisibility.postValue(View.GONE)
-            emit(retrievedData)
+            try{
+                val retrievedData = repository.getData(searchString)
+                loadingVisibility.postValue(View.GONE)
+                emit(retrievedData)
+            }catch(e: Exception){
+                loadingVisibility.postValue(View.GONE)
+                emit(null)
+            }
         }
 
     private val adapter =
@@ -109,6 +118,9 @@ class ListViewModel @ViewModelInject constructor(
     }
 
     override fun onQueryTextChange(newText: String?): Boolean {
+        if(newText.isNullOrEmpty()){
+            searchString = ""
+        }
         return false
     }
 }

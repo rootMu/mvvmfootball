@@ -6,4 +6,7 @@
     <string name="home_ground">Homeground %1$s in %2$s</string>
     <string name="search">search…</string>
     <string name="age">Age: %1$s</string>
+    <string name="empty">No result to display%1$s Try doing a search above</string>
+    <string name="full_stop">.</string>
+    <string name="result_for">\u0020for search \"%1$s\".</string>
 </resources>

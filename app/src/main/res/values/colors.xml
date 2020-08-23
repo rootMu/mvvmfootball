@@ -5,6 +5,7 @@
     <color name="colorAccent">#03DAC5</color>
     <color name="colorGray">#A7A7A7</color>
     <color name="colorLightGray">#C7C7C7</color>
+    <color name="colorPastel">#EFEFDF</color>
     <color name="colorTeam">#D9D9D9</color>
     <color name="colorPlayer">#D9D9D9</color>
 </resources>

@@ -9,7 +9,7 @@ data class Result(
     val minVer: String,
     val players: List<Player>?,
     val request_order: Int,
-    val searchString: String,
+    val searchString: String?,
     val searchType: String,
     val serverAlert: String,
     val status: Boolean,

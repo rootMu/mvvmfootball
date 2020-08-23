@@ -10,6 +10,6 @@ import javax.inject.Singleton
 class ListRepository @Inject constructor(private val footballApi: FootballApi,
                                          private val footballDao: FootballDao) {
 
-    suspend fun getData(search: String): ApiResponse = footballApi.getFootballData(search)
+    suspend fun getData(search: String?): ApiResponse = footballApi.getFootballData(search?:"")
 
 }

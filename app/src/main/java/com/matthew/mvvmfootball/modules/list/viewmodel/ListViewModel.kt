@@ -26,13 +26,13 @@ class ListViewModel @ViewModelInject constructor(
 
     private val loadTrigger = MutableLiveData(Unit)
 
-    val footballLiveData: LiveData<ApiResponse?> = loadTrigger.switchMap {
+    private val footballLiveData: LiveData<ApiResponse?> = loadTrigger.switchMap {
         loadData()
     }
 
     val uiData = Transformations.map(footballLiveData, ::mapDataToUi)
 
-    private var searchString = ""
+    private var searchString: String? = ""
 
     private fun mapDataToUi(data: ApiResponse?): List<ListUiModel> {
 
@@ -72,10 +72,8 @@ class ListViewModel @ViewModelInject constructor(
             }
 
             if(players.isNullOrEmpty() && teams.isNullOrEmpty()){
-                list.add(UiTitle())
+                list.add(UiEmptyResult(this@ListViewModel.searchString?:""))
             }
-
-            //Add Error State here for both player and teams being empty
         }
 
         return list
@@ -114,7 +112,7 @@ class ListViewModel @ViewModelInject constructor(
         val newSearch = search ?: ""
         searchString = newSearch
         loadTrigger.value = Unit
-        return searchString.isNotEmpty()
+        return !searchString.isNullOrEmpty()
     }
 
     override fun onQueryTextChange(newText: String?): Boolean {

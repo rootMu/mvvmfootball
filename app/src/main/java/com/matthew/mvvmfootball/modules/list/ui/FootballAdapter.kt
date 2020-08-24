@@ -1,23 +1,29 @@
 package com.matthew.mvvmfootball.modules.list.ui
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.matthew.mvvmfootball.R
-import com.matthew.mvvmfootball.databinding.ItemPlayerBinding
-import com.matthew.mvvmfootball.databinding.ItemTeamBinding
-import com.matthew.mvvmfootball.databinding.ItemTitleBinding
+import com.matthew.mvvmfootball.databinding.*
+import com.matthew.mvvmfootball.network.model.Player
 
-class FootballAdapter :
+class FootballAdapter(private var lifecycleOwner: LifecycleOwner) :
     ListAdapter<ListUiModel, BaseViewHolder<*>>(DiffCallback()) {
 
     companion object {
         private const val TYPE_TITLE = 0
         private const val TYPE_PLAYER = 1
         private const val TYPE_TEAM = 2
+        private const val TYPE_EMPTY = 3
+        private const val TYPE_LOAD = 4
     }
+
+    private var players = 0
+    private var teams = 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<*> {
         return when (viewType) {
@@ -32,6 +38,7 @@ class FootballAdapter :
                 )
             }
             TYPE_PLAYER -> {
+                players++
                 PlayerViewHolder(
                     DataBindingUtil.inflate(
                         LayoutInflater.from(parent.context),
@@ -42,6 +49,7 @@ class FootballAdapter :
                 )
             }
             TYPE_TEAM -> {
+                teams++
                 TeamViewHolder(
                     DataBindingUtil.inflate(
                         LayoutInflater.from(parent.context),
@@ -51,11 +59,37 @@ class FootballAdapter :
                     )
                 )
             }
-            else -> throw IllegalArgumentException("Invalid view type")
+            TYPE_LOAD -> {
+                LoadMoreViewHolder(
+                    DataBindingUtil.inflate(
+                        LayoutInflater.from(parent.context),
+                        R.layout.item_load,
+                        parent,
+                        false
+                    )
+                )
+            }
+            //Handle empty case in else, will catch all errors with an empty state
+            else -> {
+                EmptyViewHolder(
+                    DataBindingUtil.inflate(
+                        LayoutInflater.from(parent.context),
+                        R.layout.item_empty,
+                        parent,
+                        false
+                    )
+                )
+            }
         }
     }
 
-
+    override fun getItemId(position: Int): Long {
+        return if (getItemViewType(position) == TYPE_PLAYER && (getItem(position) as UiPlayer).visibility.value == true) {
+            super.getItemId(position)
+        } else {
+            super.getItemId(position) - players
+        }
+    }
 
     override fun onBindViewHolder(holder: BaseViewHolder<*>, position: Int) {
         val element = getItem(position)
@@ -63,6 +97,8 @@ class FootballAdapter :
             is TitleViewHolder -> holder.bind(element as UiTitle)
             is PlayerViewHolder -> holder.bind(element as UiPlayer)
             is TeamViewHolder -> holder.bind(element as UiClub)
+            is EmptyViewHolder -> holder.bind(element as UiEmptyResult)
+            is LoadMoreViewHolder -> holder.bind(element as UiLoadMore)
             else -> throw IllegalArgumentException()
         }
     }
@@ -72,6 +108,8 @@ class FootballAdapter :
             is UiTitle -> TYPE_TITLE
             is UiPlayer -> TYPE_PLAYER
             is UiClub -> TYPE_TEAM
+            is UiEmptyResult -> TYPE_EMPTY
+            is UiLoadMore -> TYPE_LOAD
             else -> throw IllegalArgumentException("Invalid type of data " + position)
         }
     }
@@ -79,7 +117,11 @@ class FootballAdapter :
     inner class TitleViewHolder(private val binding: ItemTitleBinding) :
         BaseViewHolder<UiTitle>(binding.root) {
         override fun bind(item: UiTitle) {
-            binding.title = item.name
+            binding.title = item
+            binding.showHide.setOnClickListener {
+                item.onClick.invoke()
+                binding.showHide.isSelected = !binding.showHide.isSelected
+            }
         }
     }
 
@@ -87,6 +129,7 @@ class FootballAdapter :
         BaseViewHolder<UiPlayer>(binding.root) {
         override fun bind(item: UiPlayer) {
             binding.player = item
+            binding.lifecycleOwner = lifecycleOwner
         }
     }
 
@@ -94,9 +137,26 @@ class FootballAdapter :
         BaseViewHolder<UiClub>(binding.root) {
         override fun bind(item: UiClub) {
             binding.club = item
+            binding.lifecycleOwner = lifecycleOwner
         }
     }
 
+    inner class EmptyViewHolder(private val binding: ItemEmptyBinding) :
+        BaseViewHolder<UiEmptyResult>(binding.root) {
+        override fun bind(item: UiEmptyResult) {
+            binding.search = item.name
+        }
+    }
+
+    inner class LoadMoreViewHolder(private val binding: ItemLoadBinding) :
+        BaseViewHolder<UiLoadMore>(binding.root) {
+        override fun bind(item: UiLoadMore) {
+            binding.load = item
+            itemView.setOnClickListener {
+                item.onClick.invoke()
+            }
+        }
+    }
 }
 
 class DiffCallback<T : ListUiModel> : DiffUtil.ItemCallback<T>() {
@@ -105,16 +165,13 @@ class DiffCallback<T : ListUiModel> : DiffUtil.ItemCallback<T>() {
             is UiTitle -> oldItem.name == newItem.name
             is UiPlayer -> oldItem.name == newItem.name
             is UiClub -> oldItem.name == newItem.name
+            is UiEmptyResult -> oldItem.name == newItem.name
+            is UiLoadMore -> oldItem.name == newItem.name
             else -> false
         }
     }
 
     override fun areContentsTheSame(oldItem: T, newItem: T): Boolean {
-        return when (oldItem) {
-            is UiTitle -> oldItem.name == newItem.name
-            is UiPlayer -> oldItem.name == newItem.name
-            is UiClub -> oldItem.name == newItem.name
-            else -> false
-        }
+        return oldItem.equals(newItem)
     }
 }

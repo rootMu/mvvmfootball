@@ -6,13 +6,16 @@
         <variable
                 name="player"
                 type="com.matthew.mvvmfootball.modules.list.ui.UiPlayer" />
+
+        <import type="android.view.View"/>
     </data>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/colorPlayer"
-        android:layout_margin="@dimen/card_margin"
+        android:visibility="@{player.visibility ? View.VISIBLE : View.GONE}"
+        app:adjustHeight="@{player.visibility}"
         app:cardCornerRadius="@dimen/corner_radius">
 
         <androidx.constraintlayout.widget.ConstraintLayout

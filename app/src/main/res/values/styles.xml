@@ -13,4 +13,10 @@
         <item name="android:windowDisablePreview">true</item>
     </style>
 
+    <style name="textLink" parent="@style/TextAppearance.AppCompat">
+        <item name="android:textColor">@color/colorLink</item>
+        <item name="android:textAppearance">@style/Widget.AppCompat.Spinner.Underlined</item>
+        <item name="android:textSize">@dimen/small_text</item>
+    </style>
+
 </resources>

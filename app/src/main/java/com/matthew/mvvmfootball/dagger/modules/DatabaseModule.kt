@@ -3,10 +3,6 @@ package com.matthew.mvvmfootball.dagger.modules
 import android.content.Context
 import androidx.room.Room
 import com.matthew.mvvmfootball.dagger.qualifier.ForDatabase
-import com.matthew.mvvmfootball.modules.ListRepository
-import com.matthew.mvvmfootball.network.FootballApi
-import com.matthew.mvvmfootball.room.FootballDao
-import com.matthew.mvvmfootball.room.FootballDataHandler
 import com.matthew.mvvmfootball.room.FootballDatabase
 import dagger.Module
 import dagger.Provides

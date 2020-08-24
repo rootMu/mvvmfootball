@@ -3,7 +3,7 @@ package com.matthew.mvvmfootball.dagger.modules
 import android.content.Context
 import androidx.room.Room
 import com.matthew.mvvmfootball.dagger.qualifier.ForDatabase
-import com.matthew.mvvmfootball.room.FootballDatabase
+import com.matthew.mvvmfootball.data.local.FootballDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

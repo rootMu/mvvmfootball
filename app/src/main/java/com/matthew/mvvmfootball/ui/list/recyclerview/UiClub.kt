@@ -1,6 +1,7 @@
-package com.matthew.mvvmfootball.modules.list.ui
+package com.matthew.mvvmfootball.ui.list.recyclerview
 
 import androidx.lifecycle.LiveData
+import com.matthew.mvvmfootball.ui.list.recyclerview.UiModel
 
 data class UiClub(
     override var name: String = "",
@@ -8,4 +9,4 @@ data class UiClub(
     var homeGround: String = "",
     var city: String = "",
     var visibility: LiveData<Boolean>
-):ListUiModel
+): UiModel

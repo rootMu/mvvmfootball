@@ -6,7 +6,7 @@
     <data>
         <variable
             name="viewModel"
-            type="com.matthew.mvvmfootball.modules.list.viewmodel.ListViewModel" />
+            type="com.matthew.mvvmfootball.ui.list.viewmodel.ListViewModel" />
 
         <variable
             name="layoutManager"
@@ -14,7 +14,7 @@
 
         <variable
             name="onNetworkErrorSelect"
-            type="com.matthew.mvvmfootball.modules.list.ui.OnNetworkErrorSelect"/>
+            type="com.matthew.mvvmfootball.utils.OnNetworkErrorSelect"/>
 
         <import type="android.view.View"/>
     </data>
@@ -30,7 +30,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context=".modules.list.ui.ListActivity">
+            tools:context=".ui.list.ListActivity">
 
             <androidx.appcompat.widget.SearchView
                 app:layout_constraintTop_toTopOf="parent"

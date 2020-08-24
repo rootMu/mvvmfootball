@@ -6,7 +6,7 @@
 
         <variable
             name="player"
-            type="com.matthew.mvvmfootball.modules.list.ui.UiPlayer" />
+            type="com.matthew.mvvmfootball.ui.list.recyclerview.UiPlayer" />
 
         <import type="android.view.View" />
 

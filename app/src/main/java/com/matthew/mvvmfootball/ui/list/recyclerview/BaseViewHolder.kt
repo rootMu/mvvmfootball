@@ -1,4 +1,4 @@
-package com.matthew.mvvmfootball.modules.list.ui
+package com.matthew.mvvmfootball.ui.list.recyclerview
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView

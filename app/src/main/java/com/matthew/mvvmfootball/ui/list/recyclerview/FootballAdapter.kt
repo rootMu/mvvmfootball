@@ -1,7 +1,6 @@
-package com.matthew.mvvmfootball.modules.list.ui
+package com.matthew.mvvmfootball.ui.list.recyclerview
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LifecycleOwner
@@ -9,10 +8,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.matthew.mvvmfootball.R
 import com.matthew.mvvmfootball.databinding.*
-import com.matthew.mvvmfootball.network.model.Player
 
 class FootballAdapter(private var lifecycleOwner: LifecycleOwner) :
-    ListAdapter<ListUiModel, BaseViewHolder<*>>(DiffCallback()) {
+    ListAdapter<UiModel, BaseViewHolder<*>>(DiffCallback()) {
 
     companion object {
         private const val TYPE_TITLE = 0
@@ -161,9 +159,13 @@ class FootballAdapter(private var lifecycleOwner: LifecycleOwner) :
         }
     }
 
-    inner class NetworkErrorViewHolder(binding: ItemNetworkErrorBinding) :
+    inner class NetworkErrorViewHolder(private var binding: ItemNetworkErrorBinding) :
         BaseViewHolder<UiNetworkError>(binding.root) {
-        override fun bind(item: UiNetworkError) {}
+        override fun bind(item: UiNetworkError) {
+            if(item.name.isNotEmpty()){
+                binding.error = item.name
+            }
+        }
     }
 
     inner class LoadMoreViewHolder(private val binding: ItemLoadBinding) :
@@ -178,8 +180,8 @@ class FootballAdapter(private var lifecycleOwner: LifecycleOwner) :
     }
 }
 
-class DiffCallback<T : ListUiModel> : DiffUtil.ItemCallback<T>() {
-    override fun areItemsTheSame(oldItem: T, newItem: T): Boolean {
+class DiffCallback : DiffUtil.ItemCallback<UiModel>() {
+    override fun areItemsTheSame(oldItem: UiModel, newItem: UiModel): Boolean {
         return when (oldItem) {
             is UiTitle -> oldItem.name == newItem.name
             is UiPlayer -> oldItem.name == newItem.name
@@ -191,7 +193,8 @@ class DiffCallback<T : ListUiModel> : DiffUtil.ItemCallback<T>() {
         }
     }
 
-    override fun areContentsTheSame(oldItem: T, newItem: T): Boolean {
-        return oldItem.equals(newItem)
+    override fun areContentsTheSame(oldItem: UiModel, newItem: UiModel): Boolean {
+        val areContentsTheSame = oldItem.equals(newItem)
+        return areContentsTheSame
     }
 }

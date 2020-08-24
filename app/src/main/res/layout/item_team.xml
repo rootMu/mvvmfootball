@@ -5,7 +5,7 @@
     <data>
         <variable
             name="club"
-            type="com.matthew.mvvmfootball.modules.list.ui.UiClub" />
+            type="com.matthew.mvvmfootball.ui.list.recyclerview.UiClub" />
 
         <import type="android.view.View"/>
     </data>

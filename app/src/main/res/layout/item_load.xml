@@ -5,7 +5,7 @@
     <data>
         <variable
                 name="load"
-                type="com.matthew.mvvmfootball.modules.list.ui.UiLoadMore" />
+                type="com.matthew.mvvmfootball.ui.list.recyclerview.UiLoadMore" />
 
         <import type="android.view.View"/>
     </data>

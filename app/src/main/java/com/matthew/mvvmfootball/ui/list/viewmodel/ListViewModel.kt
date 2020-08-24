@@ -1,4 +1,4 @@
-package com.matthew.mvvmfootball.modules.list.viewmodel
+package com.matthew.mvvmfootball.ui.list.viewmodel
 
 import android.content.Context
 import android.net.ConnectivityManager
@@ -15,11 +15,12 @@ import com.matthew.mvvmfootball.R
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.matthew.mvvmfootball.modules.ListRepository
-import com.matthew.mvvmfootball.modules.list.ui.*
+import com.matthew.mvvmfootball.data.remote.FootballData
+import com.matthew.mvvmfootball.data.repository.ListRepository
+import com.matthew.mvvmfootball.ui.list.recyclerview.*
 import com.matthew.mvvmfootball.utils.FlipableLiveData
+import com.matthew.mvvmfootball.utils.Resource
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
 import java.util.*
 
 class ListViewModel @ViewModelInject constructor(
@@ -74,13 +75,18 @@ class ListViewModel @ViewModelInject constructor(
 
     private val loadTrigger = MutableLiveData(Unit)
 
-    private val footballLiveData: LiveData<UiModel?> = loadTrigger.switchMap {
-        loadData()
+    private val _footballData = loadTrigger.switchMap {
+        repository.getData(
+            searchParameters.searchString?:"",
+            searchType = searchParameters.searchType,
+            offset = searchParameters.offset
+        )
     }
 
-    private val currentLiveData: LiveData<UiModel?> = footballLiveData
+    val footballDataLiveData: LiveData<Resource<FootballData>> = _footballData
 
-    val uiData = Transformations.map(footballLiveData, ::mapDataToUi)
+    private val _uiData: MutableLiveData<List<UiModel>> = MutableLiveData()
+    val uiData: LiveData<List<UiModel>> get() = _uiData
 
     private var searchParameters = SearchParameters()
 
@@ -97,18 +103,18 @@ class ListViewModel @ViewModelInject constructor(
         }
     }
 
-    private fun mapDataToUi(data: UiModel?): List<ListUiModel> {
+    fun mapDataToUi(data: FootballData?) {
 
-        val list = mutableListOf<ListUiModel>()
+        val list = mutableListOf<UiModel>()
 
         data?.apply {
             players?.map {
                 list.add(
                     UiPlayer(
-                        name = "${it.playerFirstName} ${it.playerSecondName}",
-                        age = it.playerAge,
-                        club = it.playerClub,
-                        nationality = it.playerNationality,
+                        name = "${it.firstName} ${it.secondName}",
+                        age = it.age,
+                        club = it.club,
+                        nationality = it.nationality,
                         visibility = playerVisibility
                     )
                 )
@@ -117,10 +123,10 @@ class ListViewModel @ViewModelInject constructor(
             teams?.map {
                 list.add(
                     UiClub(
-                        name = it.teamName,
-                        nationality = it.teamNationality,
-                        homeGround = it.teamStadium,
-                        city = it.teamCity,
+                        name = it.name,
+                        nationality = it.nationality,
+                        homeGround = it.stadium,
+                        city = it.city,
                         visibility = teamVisibility
                     )
                 )
@@ -129,11 +135,21 @@ class ListViewModel @ViewModelInject constructor(
             //if there were clubs add a club title to the beginning
             if (!teams.isNullOrEmpty()) {
                 if (teams.size % 10 == 0 && !searchParameters.endOfTeamSearch)
-                    list.add(UiLoadMore(onClick = loadTeams, visibility = teamVisibility))
+                    list.add(
+                        UiLoadMore(
+                            onClick = loadTeams,
+                            visibility = teamVisibility
+                        )
+                    )
 
                 list.add(
                     players?.size ?: 0,
-                    UiTitle(context.getString(R.string.clubs, teams.size), ::showHideTeams)
+                    UiTitle(
+                        context.getString(
+                            R.string.clubs,
+                            teams.size
+                        ), ::showHideTeams
+                    )
                 )
             }
 
@@ -142,23 +158,47 @@ class ListViewModel @ViewModelInject constructor(
                 if (players.size % 10 == 0 && !searchParameters.endOfPlayerSearch)
                     list.add(
                         players.size,
-                        UiLoadMore(onClick = loadPlayers, visibility = playerVisibility)
+                        UiLoadMore(
+                            onClick = loadPlayers,
+                            visibility = playerVisibility
+                        )
                     )
 
                 list.add(
                     0,
-                    UiTitle(context.getString(R.string.players, players.size), ::showHidePlayers)
+                    UiTitle(
+                        context.getString(
+                            R.string.players,
+                            players.size
+                        ), ::showHidePlayers
+                    )
                 )
             }
 
             if (players.isNullOrEmpty() && teams.isNullOrEmpty()) {
-                list.add(UiEmptyResult(this@ListViewModel.searchParameters.searchString ?: ""))
+                list.add(
+                    UiEmptyResult(
+                        this@ListViewModel.searchParameters.searchString ?: ""
+                    )
+                )
             }
         }?: list.add(
             UiNetworkError()
         )
 
-        return list
+        loadingVisibility.postValue(View.GONE)
+
+        _uiData.postValue(list)
+    }
+
+    fun mapErrorToUi(message: String?){
+        loadingVisibility.postValue(View.GONE)
+        val list = mutableListOf<UiModel>(
+            UiNetworkError(
+                name = message ?: ""
+            )
+        )
+        _uiData.postValue(list)
     }
 
     private fun showHidePlayers() {
@@ -191,50 +231,6 @@ class ListViewModel @ViewModelInject constructor(
         }
         setSearchString(searchParameters.searchString)
     }
-
-    private fun loadData() =
-        liveData(Dispatchers.IO) {
-            try {
-                val retrievedData =
-                    repository.getData(
-                        searchParameters.searchString,
-                        searchType = searchParameters.searchType,
-                        offset = searchParameters.offset
-                    )
-                loadingVisibility.postValue(View.GONE)
-                emit(
-                    if (loadMore) {
-                        //check to see if the new data coming in is already contained in the old data
-                        //this is because we cannot only use mod of 10 to hide the load more feature
-                        //as the final total may be divisible by 10
-                        when (searchParameters.searchType) {
-                            PLAYERS -> {
-                                retrievedData?.players?.first()?.let { retrieved ->
-                                    currentLiveData.value?.players?.let { current ->
-                                        searchParameters.endOfPlayerSearch =
-                                            current.contains(retrieved)
-                                    }
-                                }
-                            }
-                            TEAMS -> {
-                                retrievedData?.teams?.first()?.let { retrieved ->
-                                    currentLiveData.value?.teams?.let { current ->
-                                        searchParameters.endOfTeamSearch =
-                                            current.contains(retrieved)
-                                    }
-                                }
-                            }
-                            else -> false
-                        }
-                        retrievedData?.add(currentLiveData.value)
-                    } else
-                        retrievedData
-                )
-            } catch (e: Exception) {
-                loadingVisibility.postValue(View.GONE)
-                emit(null)
-            }
-        }
 
     lateinit var adapter: FootballAdapter
 

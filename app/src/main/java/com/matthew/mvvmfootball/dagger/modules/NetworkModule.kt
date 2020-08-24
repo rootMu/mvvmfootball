@@ -6,7 +6,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.matthew.mvvmfootball.BuildConfig.BASE_URL
-import com.matthew.mvvmfootball.network.FootballApi
+import com.matthew.mvvmfootball.data.remote.FootballService
 import dagger.Module
 import dagger.Provides
 import dagger.Reusable
@@ -19,7 +19,6 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
-import javax.inject.Singleton
 
 /**
  * Network Specific Dependencies
@@ -36,8 +35,8 @@ object NetworkModule {
     @Provides
     @Reusable
     @JvmStatic
-    internal fun provideFootballApi(retrofit: Retrofit): FootballApi {
-        return retrofit.create(FootballApi::class.java)
+    internal fun provideFootballApi(retrofit: Retrofit): FootballService {
+        return retrofit.create(FootballService::class.java)
     }
 
     @Provides

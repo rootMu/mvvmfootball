@@ -4,16 +4,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.widget.SearchView
 import androidx.databinding.BindingAdapter
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.matthew.mvvmfootball.R
-import com.matthew.mvvmfootball.modules.list.ui.FootballAdapter
-import com.matthew.mvvmfootball.modules.list.ui.ListUiModel
+import com.matthew.mvvmfootball.ui.list.recyclerview.FootballAdapter
+import com.matthew.mvvmfootball.ui.list.recyclerview.UiModel
 
 @BindingAdapter("onRefreshListener")
 fun setOnRefreshListener(view: SwipeRefreshLayout, listener: SwipeRefreshLayout.OnRefreshListener) {
@@ -28,13 +26,10 @@ fun setIsRefreshing(view: SwipeRefreshLayout, visibility: MutableLiveData<Int>) 
 }
 
 @BindingAdapter("submitList")
-fun setAdapterItems(view: RecyclerView, items: LiveData<List<ListUiModel>>) {
+fun setAdapterItems(view: RecyclerView, items: LiveData<List<UiModel>>) {
     items.value?.let {
         with(view.adapter as FootballAdapter) {
-            val start = itemCount <= 1
             submitList(it)
-            if (start)
-                view.scrollToPosition(0)
         }
     }
 }

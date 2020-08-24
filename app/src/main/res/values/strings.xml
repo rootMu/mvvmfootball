@@ -13,4 +13,5 @@
     <string name="scroll">scroll to top</string>
     <string name="clubs">Clubs (%1$d)</string>
     <string name="players">Players (%1$d)</string>
+    <string name="no_network">No network is currently detected. Try to refresh your network and/or app</string>
 </resources>

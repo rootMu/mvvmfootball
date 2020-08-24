@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.matthew.mvvmfootball.modules.ListRepository
 import com.matthew.mvvmfootball.modules.list.ui.*
-import com.matthew.mvvmfootball.network.model.ApiResponse
 import com.matthew.mvvmfootball.utils.FlipableLiveData
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -62,7 +61,6 @@ class ListViewModel @ViewModelInject constructor(
         cm.registerNetworkCallback(networkRequest, networkCallback)
     }
 
-    val viewState: MutableLiveData<UiModel> = MutableLiveData()
     val loadingVisibility: MutableLiveData<Int> = MutableLiveData()
     private var loadMore: Boolean = false
     private var playerVisibility = FlipableLiveData(true)
@@ -76,11 +74,11 @@ class ListViewModel @ViewModelInject constructor(
 
     private val loadTrigger = MutableLiveData(Unit)
 
-    private val footballLiveData: LiveData<ApiResponse?> = loadTrigger.switchMap {
+    private val footballLiveData: LiveData<UiModel?> = loadTrigger.switchMap {
         loadData()
     }
 
-    private val currentLiveData: LiveData<ApiResponse?> = footballLiveData
+    private val currentLiveData: LiveData<UiModel?> = footballLiveData
 
     val uiData = Transformations.map(footballLiveData, ::mapDataToUi)
 
@@ -99,12 +97,11 @@ class ListViewModel @ViewModelInject constructor(
         }
     }
 
-    private fun mapDataToUi(data: ApiResponse?): List<ListUiModel> {
+    private fun mapDataToUi(data: UiModel?): List<ListUiModel> {
 
         val list = mutableListOf<ListUiModel>()
 
-        data?.result?.apply {
-
+        data?.apply {
             players?.map {
                 list.add(
                     UiPlayer(
@@ -156,7 +153,9 @@ class ListViewModel @ViewModelInject constructor(
             if (players.isNullOrEmpty() && teams.isNullOrEmpty()) {
                 list.add(UiEmptyResult(this@ListViewModel.searchParameters.searchString ?: ""))
             }
-        }
+        }?: list.add(
+            UiNetworkError()
+        )
 
         return list
     }
@@ -209,16 +208,16 @@ class ListViewModel @ViewModelInject constructor(
                         //as the final total may be divisible by 10
                         when (searchParameters.searchType) {
                             PLAYERS -> {
-                                retrievedData.result.players?.first()?.let { retrieved ->
-                                    currentLiveData.value?.result?.players?.let { current ->
+                                retrievedData?.players?.first()?.let { retrieved ->
+                                    currentLiveData.value?.players?.let { current ->
                                         searchParameters.endOfPlayerSearch =
                                             current.contains(retrieved)
                                     }
                                 }
                             }
                             TEAMS -> {
-                                retrievedData.result.teams?.first()?.let { retrieved ->
-                                    currentLiveData.value?.result?.teams?.let { current ->
+                                retrievedData?.teams?.first()?.let { retrieved ->
+                                    currentLiveData.value?.teams?.let { current ->
                                         searchParameters.endOfTeamSearch =
                                             current.contains(retrieved)
                                     }
@@ -226,7 +225,7 @@ class ListViewModel @ViewModelInject constructor(
                             }
                             else -> false
                         }
-                        retrievedData.add(currentLiveData.value)
+                        retrievedData?.add(currentLiveData.value)
                     } else
                         retrievedData
                 )
@@ -243,10 +242,6 @@ class ListViewModel @ViewModelInject constructor(
     override fun onRefresh() {
         resetSearchParameters(searchParameters.searchString)
         setSearchString(searchParameters.searchString)
-    }
-
-    sealed class UiModel {
-        data class Error(val exception: Exception) : UiModel()
     }
 
     override fun onQueryTextSubmit(query: String?): Boolean {

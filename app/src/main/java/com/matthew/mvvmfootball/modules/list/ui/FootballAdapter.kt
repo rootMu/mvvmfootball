@@ -20,6 +20,7 @@ class FootballAdapter(private var lifecycleOwner: LifecycleOwner) :
         private const val TYPE_TEAM = 2
         private const val TYPE_EMPTY = 3
         private const val TYPE_LOAD = 4
+        private const val TYPE_NETWORK_ERROR = 5
     }
 
     private var players = 0
@@ -69,6 +70,16 @@ class FootballAdapter(private var lifecycleOwner: LifecycleOwner) :
                     )
                 )
             }
+            TYPE_NETWORK_ERROR -> {
+                NetworkErrorViewHolder(
+                    DataBindingUtil.inflate(
+                        LayoutInflater.from(parent.context),
+                        R.layout.item_network_error,
+                        parent,
+                        false
+                    )
+                )
+            }
             //Handle empty case in else, will catch all errors with an empty state
             else -> {
                 EmptyViewHolder(
@@ -99,6 +110,7 @@ class FootballAdapter(private var lifecycleOwner: LifecycleOwner) :
             is TeamViewHolder -> holder.bind(element as UiClub)
             is EmptyViewHolder -> holder.bind(element as UiEmptyResult)
             is LoadMoreViewHolder -> holder.bind(element as UiLoadMore)
+            is NetworkErrorViewHolder -> holder.bind(element as UiNetworkError)
             else -> throw IllegalArgumentException()
         }
     }
@@ -110,6 +122,7 @@ class FootballAdapter(private var lifecycleOwner: LifecycleOwner) :
             is UiClub -> TYPE_TEAM
             is UiEmptyResult -> TYPE_EMPTY
             is UiLoadMore -> TYPE_LOAD
+            is UiNetworkError -> TYPE_NETWORK_ERROR
             else -> throw IllegalArgumentException("Invalid type of data " + position)
         }
     }
@@ -148,6 +161,11 @@ class FootballAdapter(private var lifecycleOwner: LifecycleOwner) :
         }
     }
 
+    inner class NetworkErrorViewHolder(binding: ItemNetworkErrorBinding) :
+        BaseViewHolder<UiNetworkError>(binding.root) {
+        override fun bind(item: UiNetworkError) {}
+    }
+
     inner class LoadMoreViewHolder(private val binding: ItemLoadBinding) :
         BaseViewHolder<UiLoadMore>(binding.root) {
         override fun bind(item: UiLoadMore) {
@@ -155,6 +173,7 @@ class FootballAdapter(private var lifecycleOwner: LifecycleOwner) :
             itemView.setOnClickListener {
                 item.onClick.invoke()
             }
+            binding.lifecycleOwner = lifecycleOwner
         }
     }
 }
@@ -166,6 +185,7 @@ class DiffCallback<T : ListUiModel> : DiffUtil.ItemCallback<T>() {
             is UiPlayer -> oldItem.name == newItem.name
             is UiClub -> oldItem.name == newItem.name
             is UiEmptyResult -> oldItem.name == newItem.name
+            is UiNetworkError -> oldItem.name == newItem.name
             is UiLoadMore -> oldItem.name == newItem.name
             else -> false
         }

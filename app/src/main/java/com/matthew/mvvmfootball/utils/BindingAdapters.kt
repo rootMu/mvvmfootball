@@ -1,11 +1,13 @@
 package com.matthew.mvvmfootball.utils
 
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.databinding.BindingAdapter
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.matthew.mvvmfootball.R
@@ -28,7 +30,10 @@ fun setIsRefreshing(view: SwipeRefreshLayout, visibility: MutableLiveData<Int>) 
 fun setAdapterItems(view: RecyclerView, items: LiveData<List<ListUiModel>>) {
     items.value?.let {
         with(view.adapter as FootballAdapter) {
+            val start = itemCount <= 1
             submitList(it)
+            if (start)
+                view.scrollToPosition(0)
         }
     }
 }
@@ -49,4 +54,14 @@ fun setPlayerTeam(view: TextView, club: String) {
         } else {
             view.resources.getString(R.string.plays_for, club)
         }
+}
+
+@BindingAdapter("adjustHeight")
+fun adjustHeight(view: View, visibility: LiveData<Boolean>){
+    view.layoutParams.height = visibility.value?.let{
+        if(it)
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        else
+            0
+    }?:0
 }

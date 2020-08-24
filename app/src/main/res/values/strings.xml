@@ -9,4 +9,8 @@
     <string name="empty">No result to display%1$s Try doing a search above</string>
     <string name="full_stop">.</string>
     <string name="result_for">\u0020for search \"%1$s\".</string>
+    <string name="load">load more…</string>
+    <string name="scroll">scroll to top</string>
+    <string name="clubs">Clubs (%1$d)</string>
+    <string name="players">Players (%1$d)</string>
 </resources>

@@ -10,5 +10,5 @@ interface FootballApi {
      * Get a list of football players and teams
      */
     @POST("/api/football/1.0/search")
-    suspend fun getFootballData(@Query("searchString") searchString: String): ApiResponse
+    suspend fun getFootballData(@Query("searchString") searchString: String, @Query("searchType") searchType: String? = null, @Query("offset") offset: Int = 0): ApiResponse
 }

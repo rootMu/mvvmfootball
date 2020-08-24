@@ -6,13 +6,16 @@
         <variable
             name="club"
             type="com.matthew.mvvmfootball.modules.list.ui.UiClub" />
+
+        <import type="android.view.View"/>
     </data>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/colorTeam"
-        android:layout_margin="@dimen/card_margin"
+        android:visibility="@{club.visibility ? View.VISIBLE : View.GONE}"
+        app:adjustHeight="@{club.visibility}"
         app:cardCornerRadius="@dimen/corner_radius">
 
         <androidx.constraintlayout.widget.ConstraintLayout

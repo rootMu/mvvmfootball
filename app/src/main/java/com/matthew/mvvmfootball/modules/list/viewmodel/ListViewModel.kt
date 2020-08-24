@@ -1,6 +1,10 @@
 package com.matthew.mvvmfootball.modules.list.viewmodel
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.util.Log
 import android.view.View
 import androidx.appcompat.widget.SearchView
@@ -16,11 +20,13 @@ import com.matthew.mvvmfootball.modules.list.ui.*
 import com.matthew.mvvmfootball.utils.FlipableLiveData
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import java.util.*
 
 class ListViewModel @ViewModelInject constructor(
     private var repository: ListRepository,
     @Assisted private val savedStateHandle: SavedStateHandle,
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private var cm: ConnectivityManager
 ) : ViewModel(), SwipeRefreshLayout.OnRefreshListener, LifecycleObserver,
     SearchView.OnQueryTextListener {
 
@@ -30,10 +36,38 @@ class ListViewModel @ViewModelInject constructor(
         private const val TEAMS = "teams"
     }
 
+    init {
+        val networkRequest = NetworkRequest.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+            .build()
+
+        val networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onLost(network: Network) {
+                networkAvailability.postValue(false)
+            }
+
+            override fun onUnavailable() {
+                networkAvailability.postValue(false)
+            }
+
+            override fun onLosing(network: Network, maxMsToLive: Int) {}
+
+            override fun onAvailable(network: Network) {
+                networkAvailability.postValue(true)
+            }
+        }
+
+        cm.registerNetworkCallback(networkRequest, networkCallback)
+    }
+
     val loadingVisibility: MutableLiveData<Int> = MutableLiveData()
     private var loadMore: Boolean = false
     private var playerVisibility = FlipableLiveData(true)
     private var teamVisibility = FlipableLiveData(true)
+    private val networkAvailability = MutableLiveData<Boolean>()
+    val isNetworkAvailable: LiveData<Boolean> = networkAvailability
+    private var timeAtLastCall = Calendar.getInstance().time
 
     val scrollToTopVisibility = MutableLiveData<Boolean>()
     val scrollToBottomVisibility = MutableLiveData<Boolean>()
@@ -119,7 +153,9 @@ class ListViewModel @ViewModelInject constructor(
             if (players.isNullOrEmpty() && teams.isNullOrEmpty()) {
                 list.add(UiEmptyResult(this@ListViewModel.searchParameters.searchString ?: ""))
             }
-        }
+        }?: list.add(
+            UiNetworkError()
+        )
 
         return list
     }
@@ -214,18 +250,22 @@ class ListViewModel @ViewModelInject constructor(
         return setSearchString(query)
     }
 
+    override fun onQueryTextChange(newText: String?): Boolean {
+        val now = Calendar.getInstance().time
+        val diff = now.time.minus(timeAtLastCall.time)
+        timeAtLastCall.time = now.time
+        return if(diff > 400){
+            onQueryTextSubmit(newText)
+        }else {
+            false
+        }
+    }
+
     private fun setSearchString(search: String? = null): Boolean {
         val newSearch = search ?: ""
         searchParameters.searchString = newSearch
         loadTrigger.value = Unit
         return !searchParameters.searchString.isNullOrEmpty()
-    }
-
-    override fun onQueryTextChange(newText: String?): Boolean {
-        if (newText.isNullOrEmpty()) {
-            searchParameters.searchString = ""
-        }
-        return false
     }
 
     private fun resetSearchParameters(search: String? = null) {

@@ -2,17 +2,16 @@ package com.matthew.mvvmfootball.modules.list.ui
 
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.matthew.mvvmfootball.R
 import com.matthew.mvvmfootball.databinding.ActivityListBinding
 import com.matthew.mvvmfootball.modules.list.viewmodel.ListViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.activity_list.*
 
 @AndroidEntryPoint
-class ListActivity : AppCompatActivity() {
+class ListActivity : AppCompatActivity(), OnNetworkErrorSelect {
 
     private val viewModel: ListViewModel by viewModels()
 
@@ -28,8 +27,18 @@ class ListActivity : AppCompatActivity() {
         binding.viewModel = viewModel.apply {
             adapter = FootballAdapter(this@ListActivity)
         }
+        binding.onNetworkErrorSelect = this@ListActivity
         binding.lifecycleOwner = this
     }
 
+    override fun errorDialog() =
+        AlertDialog.Builder(this).apply {
+            setTitle("Network Error")
+            setMessage("A network connection is required to run this app effectively")
+
+            setPositiveButton(android.R.string.ok) { _, _ ->
+                finish()
+            }
+        }
 
 }

@@ -3,6 +3,7 @@ package com.matthew.mvvmfootball.modules.list.viewmodel
 import android.content.Context
 import android.util.Log
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
@@ -15,6 +16,7 @@ import com.matthew.mvvmfootball.modules.ListRepository
 import com.matthew.mvvmfootball.modules.list.ui.*
 import com.matthew.mvvmfootball.network.model.ApiResponse
 import com.matthew.mvvmfootball.utils.FlipableLiveData
+import com.matthew.mvvmfootball.utils.NetworkUtil
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 
@@ -36,6 +38,7 @@ class ListViewModel @ViewModelInject constructor(
     private var loadMore: Boolean = false
     private var playerVisibility = FlipableLiveData(true)
     private var teamVisibility = FlipableLiveData(true)
+    val networkAvailable = NetworkUtil.isInternetAvailable(context)
 
     val scrollToTopVisibility = MutableLiveData<Boolean>()
     val scrollToBottomVisibility = MutableLiveData<Boolean>()

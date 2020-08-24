@@ -6,9 +6,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.NetworkInfo
 import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
+import javax.inject.Inject
 
 object NetworkUtil {
 

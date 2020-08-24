@@ -12,6 +12,10 @@
             name="layoutManager"
             type="androidx.recyclerview.widget.LinearLayoutManager" />
 
+        <variable
+            name="onNetworkErrorSelect"
+            type="com.matthew.mvvmfootball.modules.list.ui.OnNetworkErrorSelect"/>
+
         <import type="android.view.View"/>
     </data>
 
@@ -83,6 +87,21 @@
                 android:onClick="@{() -> list.scrollToPosition(list.adapter.itemCount - 1)}"
                 android:layout_margin="16dp"/>
 
+            <ImageButton
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:id="@+id/network_error"
+                android:layout_width="@dimen/small_icon"
+                android:layout_height="@dimen/small_icon"
+                android:scaleType="fitCenter"
+                android:src="@drawable/no_network"
+                android:tint="@color/colorRed"
+                android:contentDescription="@string/scroll"
+                android:background="?selectableItemBackgroundBorderless"
+                android:visibility="@{viewModel.isNetworkAvailable ? View.GONE : View.VISIBLE}"
+                android:onClick="@{() -> onNetworkErrorSelect.errorDialog().show()}"
+                android:layout_margin="32dp"/>
+            
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

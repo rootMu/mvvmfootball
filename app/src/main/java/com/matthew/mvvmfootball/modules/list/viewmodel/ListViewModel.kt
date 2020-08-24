@@ -108,6 +108,7 @@ class ListViewModel @ViewModelInject constructor(
                         name = "${it.playerFirstName} ${it.playerSecondName}",
                         age = it.playerAge,
                         club = it.playerClub,
+                        nationality = it.playerNationality,
                         visibility = playerVisibility
                     )
                 )

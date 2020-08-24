@@ -6,36 +6,86 @@
     <data>
         <variable
             name="viewModel"
-            type="com.matthew.mvvmfootball.modules.ListViewModel" />
+            type="com.matthew.mvvmfootball.modules.list.viewmodel.ListViewModel" />
+
+        <variable
+            name="layoutManager"
+            type="androidx.recyclerview.widget.LinearLayoutManager" />
+
+        <import type="android.view.View"/>
     </data>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".modules.ui.AlbumListActivity"
+        tools:context=".modules.list.ui.AlbumListActivity"
         app:onRefreshListener="@{viewModel}"
         app:isRefreshing="@{viewModel.getLoadingVisibility()}">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context=".SplashActivity">
+            tools:context=".modules.list.ui.ListActivity">
 
-            <TextView
+            <androidx.appcompat.widget.SearchView
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:id="@+id/search"
+                android:queryHint="@string/search"
+                android:iconifiedByDefault="false"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:OnQueryTextListener="@{viewModel}">
+
+                <requestFocus />
+
+            </androidx.appcompat.widget.SearchView>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/list"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toBottomOf="@id/search"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:adapter="@{viewModel.getFootballAdapter}"
+                app:submitList="@{viewModel.uiData}"
+                app:setOnScrollListener="@{viewModel.onScrollListener}"
+                android:layout_marginTop="@dimen/small_gap"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+            <ImageButton
+                app:layout_constraintBottom_toTopOf="@id/scrollDown"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:id="@+id/scrollUp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Hello World!"
+                android:src="@android:drawable/arrow_up_float"
+                android:contentDescription="@string/scroll"
+                android:background="?selectableItemBackgroundBorderless"
+                android:visibility="@{viewModel.scrollToTopVisibility ? View.VISIBLE : View.GONE}"
+                android:onClick="@{() -> list.scrollToPosition(0)}"
+                android:layout_margin="16dp"/>
+
+            <ImageButton
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                android:id="@+id/scrollDown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/arrow_down_float"
+                android:contentDescription="@string/scroll"
+                android:background="?selectableItemBackgroundBorderless"
+                android:visibility="@{viewModel.scrollToBottomVisibility ? View.VISIBLE : View.GONE}"
+                android:onClick="@{() -> list.scrollToPosition(list.adapter.itemCount - 1)}"
+                android:layout_margin="16dp"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
 
 </layout>
 

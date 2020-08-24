@@ -1,30 +1,31 @@
-package com.matthew.mvvmfootball
+package com.matthew.mvvmfootball.modules.splash
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import com.matthew.mvvmfootball.R
 import com.matthew.mvvmfootball.databinding.ActivitySplashBinding
-import com.matthew.mvvmfootball.modules.ListViewModel
-import dagger.hilt.android.AndroidEntryPoint
+import com.matthew.mvvmfootball.modules.list.ui.ListActivity
+import com.matthew.mvvmfootball.utils.NetworkUtil
 
-@AndroidEntryPoint
 class SplashActivity : AppCompatActivity() {
-
-    private val viewModel: ListViewModel by viewModels()
 
     private lateinit var binding: ActivitySplashBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_splash)
-        binding.viewModel = viewModel.apply {
-            launchList.observe(this@SplashActivity, Observer { launchListActivity() })
-        }
-        binding.lifecycleOwner = this
+        binding = DataBindingUtil.setContentView(this,
+            R.layout.activity_splash
+        )
+
+        NetworkUtil.isInternetAvailable(this@SplashActivity).observe(this@SplashActivity, Observer { available ->
+            if(available)
+                launchListActivity()
+        })
+
     }
 
     private fun launchListActivity() {

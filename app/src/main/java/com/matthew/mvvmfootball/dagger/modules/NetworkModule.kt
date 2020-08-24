@@ -8,15 +8,19 @@ import com.matthew.mvvmfootball.network.FootballApi
 import dagger.Module
 import dagger.Provides
 import dagger.Reusable
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ApplicationComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 
 /**
  * Network Specific Dependencies
  */
+@InstallIn(ApplicationComponent::class)
 @Module
 object NetworkModule {
 
@@ -45,20 +49,15 @@ object NetworkModule {
     @Provides
     @Reusable
     @JvmStatic
-    internal fun provideRetrofitInterface(okHttpClient: OkHttpClient, gson: Gson): Retrofit {
-        return Retrofit.Builder()
+    internal fun provideRetrofitInterface(okHttpClient: OkHttpClient, gson: Gson) =
+        Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .client(
-                provideOkHttpClient(
-                    provideLoggingInterceptor()
-                )
-            )
+            .client(okHttpClient)
             .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .addConverterFactory(GsonConverterFactory.create(gson))
+            .addConverterFactory(MoshiConverterFactory.create())
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .client(okHttpClient)
             .build()
-    }
 
     /**
      * Provides the OkHttpClient object.

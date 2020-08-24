@@ -1,14 +1,18 @@
 package com.matthew.mvvmfootball
 
 import android.app.Application
-import dagger.android.AndroidInjector
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasAndroidInjector
 import dagger.hilt.android.HiltAndroidApp
-import javax.inject.Inject
 
-@HiltAndroidApp
-class FootballApplication : Application()//, HasAndroidInjector {
+//import android.app.Application
+//import com.matthew.mvvmfootball.dagger.components.DaggerAppComponent
+//import dagger.android.AndroidInjector
+//import dagger.android.DispatchingAndroidInjector
+//import dagger.android.HasAndroidInjector
+//import dagger.hilt.android.HiltAndroidApp
+//import javax.inject.Inject
+//
+//@HiltAndroidApp
+//class FootballApplication : Application(), HasAndroidInjector {
 //
 //    @Inject lateinit var androidInjector : DispatchingAndroidInjector<Any>
 //
@@ -22,3 +26,6 @@ class FootballApplication : Application()//, HasAndroidInjector {
 //
 //    override fun androidInjector(): AndroidInjector<Any> = androidInjector
 //}
+
+@HiltAndroidApp
+class FootballApplication : Application()

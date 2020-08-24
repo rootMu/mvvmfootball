@@ -17,6 +17,7 @@ import com.matthew.mvvmfootball.network.model.ApiResponse
 import com.matthew.mvvmfootball.utils.FlipableLiveData
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import java.util.*
 
 class ListViewModel @ViewModelInject constructor(
     private var repository: ListRepository,
@@ -36,6 +37,7 @@ class ListViewModel @ViewModelInject constructor(
     private var loadMore: Boolean = false
     private var playerVisibility = FlipableLiveData(true)
     private var teamVisibility = FlipableLiveData(true)
+    private var timeAtLastCall = Calendar.getInstance().time
 
     val scrollToTopVisibility = MutableLiveData<Boolean>()
     val scrollToBottomVisibility = MutableLiveData<Boolean>()
@@ -211,19 +213,22 @@ class ListViewModel @ViewModelInject constructor(
         return setSearchString(query)
     }
 
-    private fun setSearchString(search: String? = null): Boolean {
+    override fun onQueryTextChange(newText: String?): Boolean {
+        val now = Calendar.getInstance().time
+        val diff = now.time.minus(timeAtLastCall.time)
+        timeAtLastCall.time = now.time
+        return if(diff > 400){
+            onQueryTextSubmit(newText)
+        }else {
+            false
+        }
+    }
 
+    private fun setSearchString(search: String? = null): Boolean {
         val newSearch = search ?: ""
         searchParameters.searchString = newSearch
         loadTrigger.value = Unit
         return !searchParameters.searchString.isNullOrEmpty()
-    }
-
-    override fun onQueryTextChange(newText: String?): Boolean {
-        if (newText.isNullOrEmpty()) {
-            searchParameters.searchString = ""
-        }
-        return false
     }
 
     private fun resetSearchParameters(search: String? = null) {

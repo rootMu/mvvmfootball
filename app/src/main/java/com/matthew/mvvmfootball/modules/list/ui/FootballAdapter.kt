@@ -155,6 +155,7 @@ class FootballAdapter(private var lifecycleOwner: LifecycleOwner) :
             itemView.setOnClickListener {
                 item.onClick.invoke()
             }
+            binding.lifecycleOwner = lifecycleOwner
         }
     }
 }

@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.matthew.mvvmfootball.modules.ListRepository
 import com.matthew.mvvmfootball.modules.list.ui.*
-import com.matthew.mvvmfootball.network.model.ApiResponse
 import com.matthew.mvvmfootball.utils.FlipableLiveData
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +30,6 @@ class ListViewModel @ViewModelInject constructor(
         private const val TEAMS = "teams"
     }
 
-    val viewState: MutableLiveData<UiModel> = MutableLiveData()
     val loadingVisibility: MutableLiveData<Int> = MutableLiveData()
     private var loadMore: Boolean = false
     private var playerVisibility = FlipableLiveData(true)
@@ -42,36 +40,34 @@ class ListViewModel @ViewModelInject constructor(
 
     private val loadTrigger = MutableLiveData(Unit)
 
-    private val footballLiveData: LiveData<ApiResponse?> = loadTrigger.switchMap {
+    private val footballLiveData: LiveData<UiModel?> = loadTrigger.switchMap {
         loadData()
     }
 
-    private val currentLiveData: LiveData<ApiResponse?> = footballLiveData
+    private val currentLiveData: LiveData<UiModel?> = footballLiveData
 
     val uiData = Transformations.map(footballLiveData, ::mapDataToUi)
 
     private var searchParameters = SearchParameters()
 
-    val onScrollListener = object : RecyclerView.OnScrollListener()
-    {
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int)
-        {
+    val onScrollListener = object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
             scrollToTopVisibility.postValue((recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition() > 1)
 
-            val bottom = (recyclerView.layoutManager as LinearLayoutManager).findLastCompletelyVisibleItemPosition()
-            val adapterSize =  (recyclerView.adapter?.itemCount?:1) - 1
+            val bottom =
+                (recyclerView.layoutManager as LinearLayoutManager).findLastCompletelyVisibleItemPosition()
+            val adapterSize = (recyclerView.adapter?.itemCount ?: 1) - 1
 
             scrollToBottomVisibility.postValue(bottom != adapterSize)
         }
     }
 
-    private fun mapDataToUi(data: ApiResponse?): List<ListUiModel> {
+    private fun mapDataToUi(data: UiModel?): List<ListUiModel> {
 
         val list = mutableListOf<ListUiModel>()
 
-        data?.result?.apply {
-
+        data?.apply {
             players?.map {
                 list.add(
                     UiPlayer(
@@ -97,18 +93,27 @@ class ListViewModel @ViewModelInject constructor(
 
             //if there were clubs add a club title to the beginning
             if (!teams.isNullOrEmpty()) {
-                if(teams.size % 10 == 0 && !searchParameters.endOfTeamSearch)
+                if (teams.size % 10 == 0 && !searchParameters.endOfTeamSearch)
                     list.add(UiLoadMore(onClick = loadTeams, visibility = teamVisibility))
 
-                list.add(players?.size ?: 0, UiTitle(context.getString(R.string.clubs, teams.size), ::showHideTeams))
+                list.add(
+                    players?.size ?: 0,
+                    UiTitle(context.getString(R.string.clubs, teams.size), ::showHideTeams)
+                )
             }
 
             //If there were players add a player title to the beginning
             if (!players.isNullOrEmpty()) {
-                if(players.size % 10 == 0 && !searchParameters.endOfPlayerSearch)
-                    list.add(players.size, UiLoadMore(onClick = loadPlayers, visibility = playerVisibility))
+                if (players.size % 10 == 0 && !searchParameters.endOfPlayerSearch)
+                    list.add(
+                        players.size,
+                        UiLoadMore(onClick = loadPlayers, visibility = playerVisibility)
+                    )
 
-                list.add(0, UiTitle(context.getString(R.string.players, players.size), ::showHidePlayers))
+                list.add(
+                    0,
+                    UiTitle(context.getString(R.string.players, players.size), ::showHidePlayers)
+                )
             }
 
             if (players.isNullOrEmpty() && teams.isNullOrEmpty()) {
@@ -119,11 +124,11 @@ class ListViewModel @ViewModelInject constructor(
         return list
     }
 
-    private fun showHidePlayers(){
+    private fun showHidePlayers() {
         playerVisibility.flip()
     }
 
-    private fun showHideTeams(){
+    private fun showHideTeams() {
         teamVisibility.flip()
     }
 
@@ -165,25 +170,27 @@ class ListViewModel @ViewModelInject constructor(
                         //check to see if the new data coming in is already contained in the old data
                         //this is because we cannot only use mod of 10 to hide the load more feature
                         //as the final total may be divisible by 10
-                        when(searchParameters.searchType){
+                        when (searchParameters.searchType) {
                             PLAYERS -> {
-                                retrievedData.result.players?.first()?.let{retrieved ->
-                                    currentLiveData.value?.result?.players?.let{current ->
-                                        searchParameters.endOfPlayerSearch = current.contains(retrieved)
+                                retrievedData?.players?.first()?.let { retrieved ->
+                                    currentLiveData.value?.players?.let { current ->
+                                        searchParameters.endOfPlayerSearch =
+                                            current.contains(retrieved)
                                     }
                                 }
                             }
                             TEAMS -> {
-                                retrievedData.result.teams?.first()?.let{retrieved ->
-                                    currentLiveData.value?.result?.teams?.let{current ->
-                                        searchParameters.endOfTeamSearch = current.contains(retrieved)
+                                retrievedData?.teams?.first()?.let { retrieved ->
+                                    currentLiveData.value?.teams?.let { current ->
+                                        searchParameters.endOfTeamSearch =
+                                            current.contains(retrieved)
                                     }
                                 }
                             }
                             else -> false
                         }
-                        retrievedData.add(currentLiveData.value)
-                    }else
+                        retrievedData?.add(currentLiveData.value)
+                    } else
                         retrievedData
                 )
             } catch (e: Exception) {
@@ -192,17 +199,13 @@ class ListViewModel @ViewModelInject constructor(
             }
         }
 
-    lateinit var adapter : FootballAdapter
+    lateinit var adapter: FootballAdapter
 
     fun getFootballAdapter() = adapter
 
     override fun onRefresh() {
         resetSearchParameters(searchParameters.searchString)
         setSearchString(searchParameters.searchString)
-    }
-
-    sealed class UiModel {
-        data class Error(val exception: Exception) : UiModel()
     }
 
     override fun onQueryTextSubmit(query: String?): Boolean {
@@ -212,7 +215,6 @@ class ListViewModel @ViewModelInject constructor(
     }
 
     private fun setSearchString(search: String? = null): Boolean {
-
         val newSearch = search ?: ""
         searchParameters.searchString = newSearch
         loadTrigger.value = Unit
@@ -227,7 +229,10 @@ class ListViewModel @ViewModelInject constructor(
     }
 
     private fun resetSearchParameters(search: String? = null) {
-        searchParameters = SearchParameters(searchString = search, searchType = if(loadMore)searchParameters.searchType else null)
+        searchParameters = SearchParameters(
+            searchString = search,
+            searchType = if (loadMore) searchParameters.searchType else null
+        )
     }
 
     internal data class SearchParameters(

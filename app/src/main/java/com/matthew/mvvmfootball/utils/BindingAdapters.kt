@@ -2,6 +2,7 @@ package com.matthew.mvvmfootball.utils
 
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.databinding.BindingAdapter
@@ -49,10 +50,11 @@ fun setPlayerTeam(view: TextView, club: String) {
         }
 
     view.text =
-        if (club == "Retired") {
-            club
-        } else {
-            view.resources.getString(R.string.plays_for, club)
+        when (club) {
+            "Retired" -> club
+            "Free" -> club
+            "Deceased" -> club
+            else -> view.resources.getString(R.string.plays_for, club)
         }
 }
 
@@ -64,4 +66,17 @@ fun adjustHeight(view: View, visibility: LiveData<Boolean>){
         else
             0
     }?:0
+}
+
+//android:src="@{context.getResources().getIdentifier(FlagName.getInstance().getFlagFilenameForNationality(player.nationality, context),String.format(@string/drawable),context.getPackageName())}"
+@BindingAdapter("setFlagForPlayer")
+fun setFlagForPlayer(view: ImageView, nationality: String){
+    val filename = FlagName.getFlagFilenameForNationality(nationality, view.context)
+    view.setImageResource( view.context.resources.getIdentifier(filename, "drawable", view.context.packageName))
+}
+
+@BindingAdapter("setFlagForTeam")
+fun setFlagForTeam(view: ImageView, country: String){
+    val filename = FlagName.getFlagFilenameForCountry(country, view.context)
+    view.setImageResource( view.context.resources.getIdentifier(filename, "drawable", view.context.packageName))
 }

@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">MVVM Football</string>
+
+    <string name="player_data_size">There are %1$d players</string>
+    <string name="plays_for">Plays for %1$s</string>
+    <string name="home_ground">Homeground %1$s in %2$s</string>
+    <string name="search">search…</string>
+    <string name="age">Age: %1$s</string>
+    <string name="empty">No result to display%1$s Try doing a search above</string>
+    <string name="full_stop">.</string>
+    <string name="result_for">\u0020for search \"%1$s\".</string>
+    <string name="load">load more…</string>
+    <string name="scroll">scroll to top</string>
+    <string name="clubs">Clubs (%1$d)</string>
+    <string name="players">Players (%1$d)</string>
+    <string name="no_network">No network is currently detected. Try to refresh your network and/or app</string>
+</resources>

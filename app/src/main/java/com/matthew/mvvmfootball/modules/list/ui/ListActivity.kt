@@ -35,10 +35,6 @@ class ListActivity : AppCompatActivity(), OnNetworkErrorSelect {
         AlertDialog.Builder(this).apply {
             setTitle("Network Error")
             setMessage("A network connection is required to run this app effectively")
-
-            setPositiveButton(android.R.string.ok) { _, _ ->
-                finish()
-            }
         }
 
 }

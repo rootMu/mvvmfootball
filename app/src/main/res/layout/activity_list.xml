@@ -98,7 +98,7 @@
                 android:tint="@color/colorRed"
                 android:contentDescription="@string/scroll"
                 android:background="?selectableItemBackgroundBorderless"
-                android:visibility="@{viewModel.networkAvailable ? View.VISIBLE : View.GONE}"
+                android:visibility="@{viewModel.isNetworkAvailable ? View.GONE : View.VISIBLE}"
                 android:onClick="@{() -> onNetworkErrorSelect.errorDialog().show()}"
                 android:layout_margin="32dp"/>
             

@@ -61,6 +61,15 @@
                 android:layout_marginTop="@dimen/small_gap"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
+            <pl.droidsonroids.gif.GifImageView
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_width="@dimen/large_icon"
+                android:layout_height="@dimen/large_icon"
+                android:visibility="@{viewModel.loadingVisibility}"
+                android:src="@drawable/loading" />
+
             <ImageButton
                 app:layout_constraintBottom_toTopOf="@id/scrollDown"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -98,7 +107,7 @@
                 android:tint="@color/colorRed"
                 android:contentDescription="@string/scroll"
                 android:background="?selectableItemBackgroundBorderless"
-                android:visibility="@{viewModel.isNetworkAvailable ? View.GONE : View.VISIBLE}"
+                android:visibility="@{viewModel.isNetworkAvailable}"
                 android:onClick="@{() -> onNetworkErrorSelect.errorDialog().show()}"
                 android:layout_margin="32dp"/>
             

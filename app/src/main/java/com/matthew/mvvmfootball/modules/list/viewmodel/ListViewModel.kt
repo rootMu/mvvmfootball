@@ -61,12 +61,18 @@ class ListViewModel @ViewModelInject constructor(
         cm.registerNetworkCallback(networkRequest, networkCallback)
     }
 
-    val loadingVisibility: MutableLiveData<Int> = MutableLiveData()
+    val loadingVisibility: MutableLiveData<Int> = MutableLiveData(View.GONE)
     private var loadMore: Boolean = false
     private var playerVisibility = FlipableLiveData(true)
     private var teamVisibility = FlipableLiveData(true)
     private val networkAvailability = MutableLiveData<Boolean>()
-    val isNetworkAvailable: LiveData<Boolean> = networkAvailability
+    val isNetworkAvailable = Transformations.map(networkAvailability,::mapToVisibility)
+
+    private fun mapToVisibility(visible: Boolean) = when(visible){
+        true -> View.GONE
+        false -> View.VISIBLE
+    }
+
     private var timeAtLastCall = Calendar.getInstance().time
 
     val scrollToTopVisibility = MutableLiveData<Boolean>()
@@ -195,13 +201,14 @@ class ListViewModel @ViewModelInject constructor(
     private fun loadData() =
         liveData(Dispatchers.IO) {
             try {
+                loadingVisibility.postValue(View.VISIBLE)
+
                 val retrievedData =
                     repository.getData(
                         searchParameters.searchString,
                         searchType = searchParameters.searchType,
                         offset = searchParameters.offset
                     )
-                loadingVisibility.postValue(View.GONE)
                 emit(
                     if (loadMore) {
                         //check to see if the new data coming in is already contained in the old data
@@ -230,6 +237,8 @@ class ListViewModel @ViewModelInject constructor(
                     } else
                         retrievedData
                 )
+                loadingVisibility.postValue(View.GONE)
+
             } catch (e: Exception) {
                 loadingVisibility.postValue(View.GONE)
                 emit(null)

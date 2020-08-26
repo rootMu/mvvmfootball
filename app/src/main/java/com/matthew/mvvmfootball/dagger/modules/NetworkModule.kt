@@ -19,7 +19,6 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
-import javax.inject.Singleton
 
 /**
  * Network Specific Dependencies
@@ -71,11 +70,12 @@ object NetworkModule {
     @Provides
     @Reusable
     @JvmStatic
-    internal fun provideOkHttpClient(interceptor: HttpLoggingInterceptor): OkHttpClient {
-        val b = OkHttpClient.Builder()
-        b.addInterceptor(interceptor)
-        return b.build()
-    }
+    internal fun provideOkHttpClient(interceptor: HttpLoggingInterceptor) =
+        OkHttpClient.Builder()
+            .addInterceptor(interceptor)
+            .retryOnConnectionFailure(true)
+            .build()
+
 
     /**
      * Provides the HttpLoggingInterceptor object.
@@ -93,7 +93,7 @@ object NetworkModule {
     @Provides
     @Reusable
     @JvmStatic
-    internal fun provideConnectivityManager(@ApplicationContext context: Context): ConnectivityManager{
+    internal fun provideConnectivityManager(@ApplicationContext context: Context): ConnectivityManager {
         return context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     }
 }

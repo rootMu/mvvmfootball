@@ -108,4 +108,7 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
 
+    //gif
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.17'
+
 }
